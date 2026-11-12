@@ -515,7 +515,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   .dashboard-grid:has(> .chart-panel[hidden]) .insight-panel{grid-column:1/-1}
 }
 /* Elementos exclusivos de móvil: ocultos en escritorio. */
-.tab-bar,.sheet-grabber,.sheet-close,.mobile-only,.btn-icon{display:none}
+.tab-bar,.sheet-grabber,.sheet-close,.mobile-only,.btn-icon,.status-scrim{display:none}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .btn-icon{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 
@@ -534,6 +534,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     --glass-shadow:0 10px 30px rgba(31,45,80,.12);
     --tab-active:rgba(255,255,255,.75);
     --tab-bar-h:64px;
+    --glass-sheet-head:rgba(246,248,252,.93);
+    --status-scrim:rgba(16,36,70,.78);
   }
   :root[data-theme="dark"]{
     --glass-bg:rgba(22,30,46,.52);
@@ -545,6 +547,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     --glass-highlight:inset 0 1px 0 rgba(255,255,255,.14),inset 0 -1px 0 rgba(255,255,255,.04);
     --glass-shadow:0 12px 36px rgba(0,0,0,.45);
     --tab-active:rgba(255,255,255,.13);
+    --glass-sheet-head:rgba(23,31,48,.93);
+    --status-scrim:rgba(7,13,22,.62);
   }
   body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Manrope","Segoe UI",system-ui,sans-serif;background:var(--bg);-webkit-tap-highlight-color:transparent}
   /* Fondo de color difuminado sobre el que se aprecia el cristal: una sola capa fija, barata de pintar. */
@@ -557,6 +561,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       radial-gradient(36% 30% at 8% 90%,rgba(255,150,110,.28),transparent 70%);
   }
   button{touch-action:manipulation}
+  /* App instalada en el iPhone: la barra de estado (hora, batería) va en blanco sobre la página.
+     Esta franja oscura, del alto exacto de esa zona, la mantiene legible también en modo claro (fuera de la app instalada mide 0). */
+  .status-scrim{display:block;position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);z-index:45;pointer-events:none;background:var(--status-scrim);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%)}
   .app{padding:calc(env(safe-area-inset-top) + 6px) max(10px,env(safe-area-inset-right)) calc(var(--tab-bar-h) + env(safe-area-inset-bottom) + 28px) max(10px,env(safe-area-inset-left))}
 
   /* Cabecera flotante de cristal, en una sola fila */
@@ -582,14 +589,22 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   /* Panel de supuestos como hoja inferior, con asa para cerrarla arrastrando */
   .sidebar{
     position:fixed;top:auto;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 8px);
-    width:auto;max-width:640px;margin:0 auto;max-height:min(86dvh,calc(100dvh - 40px));z-index:60;padding:0 14px 16px;border-radius:30px;
+    width:auto;max-width:640px;margin:0 auto;max-height:86vh;max-height:min(86dvh,calc(100dvh - 40px));z-index:60;padding:0 14px 16px;border-radius:30px;
     background:var(--glass-bg-strong);border:1px solid var(--glass-border);box-shadow:var(--glass-highlight),0 -10px 40px rgba(0,0,0,.2);
     -webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
     transform:translateY(calc(100% + 30px));visibility:hidden;transition:transform .34s cubic-bezier(.32,.72,0,1),visibility 0s linear .34s;
   }
   .sidebar.open{transform:translateY(var(--sheet-drag,0px));visibility:visible;transition:transform .34s cubic-bezier(.32,.72,0,1)}
   .sidebar.dragging{transition:none}
-  .sheet-grabber{display:block;position:sticky;top:0;z-index:3;height:24px;margin:0 -14px 2px;cursor:grab;touch-action:none;background:linear-gradient(var(--glass-bg-strong),transparent)}
+  /* Cabecera de la hoja (asa, título y ✕) fija arriba al desplazar; arrastrarla hacia abajo cierra la hoja. */
+  .sidebar-top{display:contents}
+  .sidebar-top>p,.sidebar-actions{margin-bottom:9px}
+  .sidebar-note{margin-bottom:12px}
+  .sheet-head{
+    position:sticky;top:0;z-index:3;margin:0 -14px 6px;padding:26px 14px 10px;cursor:grab;touch-action:none;
+    background:var(--glass-sheet-head);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);
+  }
+  .sheet-grabber{display:block;position:absolute;left:0;right:0;top:0;height:24px}
   .sheet-grabber::before{content:"";position:absolute;left:50%;top:9px;width:40px;height:5px;border-radius:999px;background:var(--text-muted);opacity:.45;transform:translateX(-50%)}
   .sheet-close{display:grid;place-items:center;width:32px;height:32px;flex-shrink:0;border:1px solid var(--glass-border);border-radius:999px;background:var(--glass-card);color:var(--text-soft);font-size:14px;cursor:pointer;box-shadow:var(--glass-highlight)}
   .mobile-only{display:inline-flex}
@@ -647,7 +662,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 /* Accesibilidad: con «Reducir transparencia» activado, el cristal pasa a superficies sólidas. */
 @media (max-width:1024px) and (prefers-reduced-transparency:reduce){
   body::before{display:none}
-  .header-shell,.tab-bar,.sidebar{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)}
+  .header-shell,.tab-bar,.sidebar,.sheet-head{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)}
+  .status-scrim{-webkit-backdrop-filter:none;backdrop-filter:none;background:#0b1626}
   .panel{background:var(--surface-elevated)}
 }
 @media print{
@@ -663,6 +679,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </head>
 <body>
 <a class="skip-link" href="#main">Saltar al panel</a>
+<div class="status-scrim" aria-hidden="true"></div>
 <div class="app">
   <header class="app-header">
     <div class="header-shell">
@@ -680,9 +697,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="mobile-backdrop" id="mobileBackdrop"></div>
   <div class="workspace">
     <aside class="sidebar" id="sidebar" aria-label="Supuestos de la estructura">
-      <div class="sheet-grabber" id="sheetGrabber" aria-hidden="true"></div>
       <div class="sidebar-top">
-        <div class="sheet-head"><h2>Supuestos y estructura</h2><button class="sheet-close" id="sheetClose" type="button" aria-label="Cerrar panel de supuestos">&#10005;</button></div>
+        <div class="sheet-head" id="sheetHead"><div class="sheet-grabber" aria-hidden="true"></div><h2>Supuestos y estructura</h2><button class="sheet-close" id="sheetClose" type="button" aria-label="Cerrar panel de supuestos">&#10005;</button></div>
         <p>Añade, renombra o elimina inmuebles, negocios, activos, ingresos y gastos. Todo se guarda automáticamente en este navegador.</p>
         <div class="sidebar-actions">
           <button class="btn" id="backupExportButton" type="button">Exportar datos</button>
@@ -1071,9 +1087,12 @@ function loadStoredData(){
 }
 function saveData(){
   if(storage.set(STORAGE_KEY,JSON.stringify(state.data))){
+    state.saveWarned=false;
     updateSaveStatus(`Guardado local ${new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}`);
   }else{
     updateSaveStatus("No se ha podido guardar en este navegador.");
+    /* El indicador de guardado no se ve en móvil: se avisa una vez con un mensaje visible. */
+    if(!state.saveWarned){state.saveWarned=true;showToast("Este navegador no deja guardar los cambios (modo privado o sin espacio). Usa «Exportar datos» para no perderlos.",{error:true})}
   }
 }
 function scheduleSave(){if(state.saveTimer)window.clearTimeout(state.saveTimer);state.saveTimer=window.setTimeout(()=>{state.saveTimer=0;saveData()},200)}
@@ -1357,7 +1376,7 @@ function simListHTML(){
   return sims.map((sim,index)=>`<div class="sim-row" data-id="${sim.id}"><label class="sim-check"><input type="checkbox" data-sim-compare="${sim.id}"${sim.comparar?" checked":""} aria-label="Comparar ${esc(sim.nombre)}"><span><strong>${esc(sim.nombre)}</strong><small>${esc(formatSimDate(sim.fecha))}</small></span></label><button class="btn btn-ghost sim-load" type="button" data-action="sim-load" data-id="${sim.id}" aria-label="Cargar ${esc(sim.nombre)}">Cargar</button>${moveButtonsHTML("simulaciones",sim.id,sim.nombre,index,sims.length)}<button class="icon-btn" type="button" data-action="sim-remove" data-id="${sim.id}" aria-label="Eliminar simulación ${esc(sim.nombre)}" title="Eliminar">&times;</button></div>`).join("");
 }
 function simulationsHTML(){
-  return `<div class="sim-save"><input type="text" id="simName" maxlength="${NAME_MAX}" placeholder="Nombre, p. ej. «Si vendo el piso 2»" aria-label="Nombre de la simulación" autocomplete="off" spellcheck="false"><button class="btn" type="button" data-action="sim-save">Guardar</button></div><div class="sim-list" id="simList">${simListHTML()}</div><p class="field-hint">Marca las simulaciones que quieras ver en el panel «Comparativa» (se muestran las ${MAX_COMPARE} primeras; ordénalas con las flechas). «Cargar» sustituye los supuestos actuales (se puede deshacer).</p>${blockRemoveHTML("simulaciones")}`;
+  return `<div class="sim-save"><input type="text" id="simName" maxlength="${NAME_MAX}" placeholder="p. ej. «Vendo el piso 2»" aria-label="Nombre de la simulación" autocomplete="off" spellcheck="false"><button class="btn" type="button" data-action="sim-save">Guardar</button></div><div class="sim-list" id="simList">${simListHTML()}</div><p class="field-hint">Marca las simulaciones que quieras ver en el panel «Comparativa» (se muestran las ${MAX_COMPARE} primeras; ordénalas con las flechas). «Cargar» sustituye los supuestos actuales (se puede deshacer).</p>${blockRemoveHTML("simulaciones")}`;
 }
 function renderSimList(){const list=document.getElementById("simList");if(list)list.innerHTML=simListHTML()}
 function viewConfigHTML(){
@@ -2398,8 +2417,7 @@ async function exportPDF(){
     catch(error){error.userMessage="No se pudo cargar el generador de PDF. Comprueba la conexión a internet.";throw error}
     const doc=buildPdf(state.results,state.results.data);
     const titular=state.results.data.settings.titular.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,30);
-    doc.save(`patrimonio-estrategico-pro-${titular?`${titular}-`:""}${localDateStamp()}.pdf`);
-    notify("PDF exportado correctamente.");
+    await deliverFile(doc.output("blob"),`patrimonio-estrategico-pro-${titular?`${titular}-`:""}${localDateStamp()}.pdf`,"PDF exportado correctamente.");
   }catch(error){
     console.error(error);
     notify(error.userMessage||"La exportación PDF no se pudo completar.",{error:true});
@@ -2444,6 +2462,8 @@ function setActiveTab(name){
   dom.tabBar.querySelectorAll("[data-tab]").forEach(tab=>{const active=tab.dataset.tab===name;tab.classList.toggle("active",active);if(active)tab.setAttribute("aria-current","true");else tab.removeAttribute("aria-current")});
 }
 function setupTabs(){
+  /* Tras pulsar una pestaña, el desplazamiento automático no debe ir cambiando la pestaña marcada por el camino. */
+  let tabLockUntil=0;
   dom.tabBar.addEventListener("click",event=>{
     const tab=event.target.closest("[data-tab]");
     if(!tab)return;
@@ -2451,20 +2471,21 @@ function setupTabs(){
     const panel=TAB_GROUPS[tab.dataset.tab].map(key=>dom.dashboardGrid.querySelector(`[data-panel="${key}"]`)).find(entry=>entry&&!entry.hidden);
     if(!panel)return;
     setActiveTab(tab.dataset.tab);
+    tabLockUntil=Date.now()+1200;
     panel.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
   });
   /* La pestaña activa sigue al panel que cruza una línea a un tercio de la pantalla (sin cálculos en cada scroll). */
   if(!("IntersectionObserver" in window))return;
   const groupOf=Object.fromEntries(Object.entries(TAB_GROUPS).flatMap(([tab,keys])=>keys.map(key=>[key,tab])));
-  const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){const tab=groupOf[entry.target.dataset.panel];if(tab)setActiveTab(tab)}},{rootMargin:"-35% 0px -64% 0px"});
+  const observer=new IntersectionObserver(entries=>{if(Date.now()<tabLockUntil)return;for(const entry of entries)if(entry.isIntersecting){const tab=groupOf[entry.target.dataset.panel];if(tab)setActiveTab(tab)}},{rootMargin:"-35% 0px -64% 0px"});
   dom.dashboardGrid.querySelectorAll("[data-panel]").forEach(panel=>observer.observe(panel));
 }
-/* Arrastrar el asa hacia abajo cierra la hoja (como en iOS). */
+/* Arrastrar la cabecera de la hoja hacia abajo la cierra (como en iOS). */
 function setupSheetDrag(){
-  const grabber=dom.sheetGrabber;
+  const grabber=dom.sheetHead;
   let startY=null,delta=0;
   grabber.addEventListener("pointerdown",event=>{
-    if(!dom.sidebar.classList.contains("open"))return;
+    if(!dom.sidebar.classList.contains("open")||event.target.closest("button"))return;
     startY=event.clientY;delta=0;
     grabber.setPointerCapture(event.pointerId);
     dom.sidebar.classList.add("dragging");
@@ -2485,12 +2506,19 @@ function setupSheetDrag(){
   grabber.addEventListener("pointercancel",finish);
 }
 function setSidebarOpen(open){
+  const wasOpen=dom.sidebar.classList.contains("open");
   dom.sidebar.classList.toggle("open",open);
   document.documentElement.classList.toggle("sidebar-open",open);
   dom.mobileBackdrop.classList.toggle("active",open);
   dom.menuButton.setAttribute("aria-expanded",String(open));
   dom.menuButton.setAttribute("aria-label",open?"Cerrar panel de supuestos":"Abrir panel de supuestos");
+  dom.tabBar.querySelector('[data-tab="datos"]')?.setAttribute("aria-expanded",String(open));
+  /* Con la hoja abierta, el resto de la página no recibe foco ni lectura de pantalla. */
+  for(const el of [dom.main,dom.appHeader,dom.tabBar])if(el)el.inert=open;
+  if(open&&!wasOpen)dom.sheetClose.focus({preventScroll:true});
 }
+/* Al cerrar la hoja, el foco vuelve al control que la abre (en móvil, la pestaña «Datos»). */
+function sheetOpener(){return dom.menuButton.offsetParent?dom.menuButton:dom.tabBar.querySelector('[data-tab="datos"]')}
 function showTooltip(button){
   const tip=dom.floatingTooltip,source=document.getElementById(button.getAttribute("aria-describedby")||"");
   if(!tip||!source)return;
@@ -2515,14 +2543,36 @@ async function copyText(text){
   area.remove();
   if(!copied)throw new Error("Copia no permitida");
 }
-function exportBackup(){
+function downloadBlob(blob,filename){
+  const url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download=filename;
+  document.body.appendChild(link);link.click();link.remove();
+  /* Margen amplio: Safari en móvil puede tardar en leer el archivo antes de guardarlo. */
+  window.setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+/* En la app instalada en el iPhone las descargas no funcionan bien: se usa la hoja de compartir
+   («Guardar en Archivos», AirDrop, Mail…). En el resto de casos, descarga normal. */
+async function deliverFile(blob,filename,doneMessage){
+  const file=navigator.standalone===true&&typeof navigator.canShare==="function"?new File([blob],filename,{type:blob.type}):null;
+  if(file&&navigator.canShare({files:[file]})){
+    const share=()=>navigator.share({files:[file]}).then(()=>notify(doneMessage));
+    try{await share();return}
+    catch(error){
+      if(error?.name==="AbortError")return; /* el usuario cerró la hoja de compartir */
+      if(error?.name==="NotAllowedError"){
+        /* El navegador exige un toque reciente para compartir: se ofrece un botón. */
+        showToast("Archivo listo para guardar.",{action:{label:"Guardar",run:()=>share().catch(err=>{if(err?.name!=="AbortError"){downloadBlob(blob,filename);notify(doneMessage)}})}});
+        return;
+      }
+    }
+  }
+  downloadBlob(blob,filename);
+  notify(doneMessage);
+}
+async function exportBackup(){
   flushScheduledRender();
   const payload={app:APP_ID,version:DATA_VERSION,exportedAt:new Date().toISOString(),data:state.data};
-  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"})),link=document.createElement("a");
-  link.href=url;link.download=`patrimonio-supuestos-${localDateStamp()}.json`;
-  document.body.appendChild(link);link.click();link.remove();
-  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
-  notify("Copia de seguridad exportada.");
+  await deliverFile(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`patrimonio-supuestos-${localDateStamp()}.json`,"Copia de seguridad exportada.");
 }
 async function importBackup(file){
   try{
@@ -2541,7 +2591,7 @@ async function importBackup(file){
 /* =========================================================================
    Eventos y arranque
    ========================================================================= */
-function cacheDom(){["sidebar","sidebarStack","sidebarNote","mobileBackdrop","themeToggle","themeLabel","resetButton","exportButton","menuButton","saveStatus","backupExportButton","backupImportButton","backupFileInput","dashboardGrid","emptyDashboard","heroTitle","heroNarrative","heroMeta","heroMetrics","heroComposition","heroInsights","kpiMeta","kpiGrid","mapMeta","patrimonialMap","balanceTable","cashflowTable","balanceNotes","scenarioMeta","scenarioStrip","scenarioGrid","yearDetails","yearTable","compareTable","projectionChartDesc","insightsGrid","chartComposition","chartCashflow","chartProjection","chartPortfolio","quoteModule","quoteText","quoteAuthor","quoteIndex","quotePrev","quoteNext","quoteCard","floatingTooltip","toast","toastText","toastAction","tabBar","sheetClose","sheetGrabber","resetButtonMobile","exportLabel"].forEach(id=>dom[id]=document.getElementById(id))}
+function cacheDom(){["sidebar","sidebarStack","sidebarNote","mobileBackdrop","themeToggle","themeLabel","resetButton","exportButton","menuButton","saveStatus","backupExportButton","backupImportButton","backupFileInput","dashboardGrid","emptyDashboard","heroTitle","heroNarrative","heroMeta","heroMetrics","heroComposition","heroInsights","kpiMeta","kpiGrid","mapMeta","patrimonialMap","balanceTable","cashflowTable","balanceNotes","scenarioMeta","scenarioStrip","scenarioGrid","yearDetails","yearTable","compareTable","projectionChartDesc","insightsGrid","chartComposition","chartCashflow","chartProjection","chartPortfolio","quoteModule","quoteText","quoteAuthor","quoteIndex","quotePrev","quoteNext","quoteCard","floatingTooltip","toast","toastText","toastAction","tabBar","sheetClose","sheetHead","resetButtonMobile","exportLabel","main"].forEach(id=>dom[id]=document.getElementById(id));dom.appHeader=document.querySelector(".app-header")}
 function bindEvents(){
   const stack=dom.sidebarStack;
   stack.addEventListener("input",event=>{if(event.target.matches("input[data-path]:not([type=checkbox])"))handleFieldInput(event.target)});
@@ -2585,7 +2635,7 @@ function bindEvents(){
   dom.resetButton.addEventListener("click",resetAll);
   dom.resetButtonMobile.addEventListener("click",resetAll);
   dom.exportButton.addEventListener("click",exportPDF);
-  dom.sheetClose.addEventListener("click",()=>{setSidebarOpen(false);dom.tabBar.querySelector('[data-tab="datos"]')?.focus()});
+  dom.sheetClose.addEventListener("click",()=>{setSidebarOpen(false);sheetOpener()?.focus({preventScroll:true})});
   setupSheetDrag();
   setupTabs();
   dom.backupExportButton.addEventListener("click",exportBackup);
@@ -2597,7 +2647,7 @@ function bindEvents(){
   document.addEventListener("keydown",event=>{
     if(event.key!=="Escape")return;
     hideTooltip();
-    if(dom.sidebar.classList.contains("open")){setSidebarOpen(false);dom.menuButton.focus()}
+    if(dom.sidebar.classList.contains("open")){setSidebarOpen(false);sheetOpener()?.focus({preventScroll:true})}
   });
   const desktopQuery=window.matchMedia("(min-width:1025px)");
   desktopQuery.addEventListener?.("change",event=>{if(event.matches)setSidebarOpen(false)});

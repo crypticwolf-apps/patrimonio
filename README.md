@@ -7,7 +7,9 @@ Dashboard patrimonial personalizable para holding, inmuebles, negocios operativo
 
 ## Uso
 
-Abre `patrimonio.html` en el navegador (o la URL de GitHub Pages). No necesita instalación ni servidor.
+Abre **https://patrimonio.cryptoatalaya.com** o el archivo `patrimonio.html` en el navegador. No necesita instalación ni servidor.
+
+En el iPhone conviene usarla desde la pantalla de inicio: Safari puede borrar los datos de las webs que no se abren en 7 días de uso del navegador; con las apps añadidas a la pantalla de inicio no pasa. Aun así, exporta una copia de tus datos de vez en cuando.
 
 ## Privacidad
 
@@ -20,5 +22,6 @@ Los datos se guardan **solo en el navegador de cada dispositivo** (`localStorage
 | `patrimonio.html` | La aplicación completa (un solo archivo). |
 | `index.html` | Redirige a `patrimonio.html` (página de entrada en GitHub Pages). |
 | `manifest.webmanifest`, `icons/` | Icono y modo app al añadirla a la pantalla de inicio. |
+| `CNAME` | Dominio propio de GitHub Pages (`patrimonio.cryptoatalaya.com`). |
 
 Las cifras son orientativas y no constituyen asesoramiento financiero ni fiscal.
