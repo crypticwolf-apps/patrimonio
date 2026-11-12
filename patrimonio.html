@@ -132,7 +132,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 /* ---------- Cabecera ---------- */
 .app-header{position:sticky;top:6px;z-index:40}
 .header-shell{
-  display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;align-items:center;gap:14px;
+  /* Laterales iguales: el título queda centrado en la página. Si los botones no caben, su columna crece y nada se solapa. */
+  display:grid;grid-template-columns:1fr minmax(0,auto) 1fr;align-items:center;gap:14px;
   min-height:var(--header-height);padding:11px 16px;border:1px solid var(--line);border-radius:20px;
   background:var(--surface-elevated);background:color-mix(in srgb,var(--surface-elevated) 88%,transparent);box-shadow:var(--shadow-soft);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
@@ -141,20 +142,25 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .brand-mark{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;overflow:hidden;background:#031326;color:#fff;font-weight:800;letter-spacing:.16em;font-size:14px}
 .brand-mark img{display:block;width:100%;height:100%;object-fit:cover}
 .brand-copy{min-width:0}
-.brand-copy .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand-copy .micro{margin-top:2px;font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Lema junto al icono: hasta dos líneas. */
+.brand-copy .micro{max-width:300px;font-size:12.5px;font-weight:700;line-height:1.35;color:var(--text-soft);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .header-title-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
 .header-title{max-width:100%;font-size:24px;line-height:1.1;font-weight:800;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .header-subtitle{max-width:100%;margin-top:4px;font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.header-actions{display:flex;align-items:center;gap:9px}
+.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;justify-self:end}
 .status-pill,.theme-toggle,.btn,.menu-btn,.chip{border-radius:13px;border:1px solid var(--line);background:var(--surface);color:var(--text)}
 .status-pill{padding:9px 12px;font-size:12px;font-weight:700;color:var(--text-soft);white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}
 .theme-toggle,.btn,.menu-btn{appearance:none;cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease}
 .theme-toggle:hover,.btn:hover,.menu-btn:hover{transform:translateY(-1px);border-color:var(--line-strong)}
 .btn:disabled{cursor:progress;opacity:.75;transform:none}
 .theme-toggle{display:inline-flex;align-items:center;gap:10px;height:44px;min-width:132px;padding:0 13px}
-.theme-indicator{width:20px;height:20px;border-radius:999px;background:linear-gradient(135deg,#102d4b,#295f93);box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
-.theme-toggle.is-dark .theme-indicator{background:linear-gradient(135deg,#efba52,#f8d98e)}
+/* El icono acompaña al texto del botón: luna con «Modo noche» (tema claro), sol con «Modo claro» (tema oscuro). */
+.theme-indicator{width:20px;height:20px;display:grid;place-items:center;flex-shrink:0}
+.theme-icon{grid-area:1/1;width:20px;height:20px}
+.icon-moon{fill:#295f93}
+.icon-sun{display:none;fill:#f6c453;stroke:#f0b43c;stroke-width:2;stroke-linecap:round}
+.theme-toggle.is-dark .icon-sun{display:block}
+.theme-toggle.is-dark .icon-moon{display:none}
 .theme-label{font-size:12px;font-weight:800;letter-spacing:.02em}
 .btn{padding:11px 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:800}
 .btn-primary{background:linear-gradient(135deg,#163f6e,#2a689f);color:#fff;border-color:transparent;box-shadow:0 10px 20px rgba(19,63,110,.22)}
@@ -489,7 +495,20 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .compare-empty{padding:14px;border:1px dashed var(--line-strong);border-radius:14px;font-size:13px;line-height:1.55;color:var(--text-soft)}
 
 /* Distribución por ancho de ventana (la barra lateral tiene ancho fijo). */
-@media (max-width:1320px) and (min-width:1025px){.status-pill{display:none}}
+/* Cabecera de escritorio: los botones se compactan a medida que falta ancho para que el título siga centrado en la página. */
+.header-actions>*{flex-shrink:0;white-space:nowrap}
+@media (max-width:1759px) and (min-width:1025px){.status-pill{display:none}}
+@media (max-width:1250px) and (min-width:1025px){
+  .theme-toggle{min-width:44px;width:44px;justify-content:center;padding:0}
+  .theme-label{display:none}
+}
+@media (max-width:1100px) and (min-width:1025px){
+  #exportButton{width:44px;padding:0}
+  #exportButton .btn-icon{display:block}
+  .header-actions .btn-label{display:none}
+  #exportButton.is-busy{width:auto;padding:0 12px}
+  #exportButton.is-busy .btn-label{display:inline}
+}
 @media (min-width:1480px){
   .hero-panel{grid-column:span 8}
   .kpi-panel{grid-column:span 4}
@@ -685,11 +704,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="app">
   <header class="app-header">
     <div class="header-shell">
-      <div class="brand"><div class="brand-mark" aria-hidden="true"><img src="icons/icon-96.png" alt="" width="42" height="42" decoding="async"></div><div class="brand-copy"><div class="eyebrow">Wealth Architecture</div><div class="micro">Planificación patrimonial, societaria y de caja para estructuras complejas</div></div></div>
+      <div class="brand"><div class="brand-mark" aria-hidden="true"><img src="icons/icon-96.png" alt="" width="42" height="42" decoding="async"></div><div class="brand-copy"><div class="micro">Planificación patrimonial, societaria y de caja para estructuras complejas</div></div></div>
       <div class="header-title-wrap"><div class="header-title">Patrimonio Estratégico Pro</div><div class="header-subtitle">Dashboard patrimonial para holding, vehículos productivos y esfera personal</div></div>
       <div class="header-actions">
         <div class="status-pill" id="saveStatus" role="status" aria-live="polite">Autoguardado local activo</div>
-        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema"><span class="theme-indicator" aria-hidden="true"></span><span class="theme-label" id="themeLabel">Modo noche</span></button>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema"><span class="theme-indicator" aria-hidden="true"><svg class="theme-icon icon-moon" viewBox="0 0 24 24"><path d="M20.8 13.4A8.6 8.6 0 0 1 10.6 3.2a8.6 8.6 0 1 0 10.2 10.2z"/></svg><svg class="theme-icon icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.3"/><path d="M12 2.3v2.3M12 19.4v2.3M2.3 12h2.3M19.4 12h2.3M5.1 5.1l1.6 1.6M17.3 17.3l1.6 1.6M5.1 18.9l1.6-1.6M17.3 6.7l1.6-1.6"/></svg></span><span class="theme-label" id="themeLabel">Modo noche</span></button>
         <button class="btn" id="resetButton" type="button">Restablecer</button>
         <button class="btn btn-primary" id="exportButton" type="button" aria-label="Exportar PDF"><svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M5 19.5h14"/></svg><span class="btn-label" id="exportLabel">Exportar PDF</span></button>
         <button class="menu-btn" id="menuButton" type="button" aria-label="Abrir panel de supuestos" aria-controls="sidebar" aria-expanded="false">&#9776;</button>
